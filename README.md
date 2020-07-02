@@ -33,7 +33,7 @@ In PRTG create under your device which represents your Synology a SSH custom adv
 
 Choose under "Script" this script and enter under "Parameters" the name of the device backed up in Active Backup for Business you want to monitor: e.g. Server1.
 
-![Screenshot1](https://github.com/WAdama/nas_hb_status/blob/master/images/nas_ab_status.png)
+![Screenshot1](https://github.com/WAdama/nas_hb_status/blob/master/images/nas_hb_status.png)
 
 For the multiple device sensor create a conf file in your Synology's file system.
 
