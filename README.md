@@ -35,7 +35,7 @@ Choose under "Script" this script and enter under "Parameters" the name and path
 
 ![Screenshot1](https://github.com/WAdama/nas_hb_status/blob/master/images/nas_hb_status.png)
 
-For the sensor create a conf file in your Synology's file system.
+For the sensor create a conf file in the chosen path.
 
 The configuration file must contain the following entry according to your backup tasks:
 
