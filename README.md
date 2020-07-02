@@ -23,10 +23,8 @@ I personally use "Login via private key" with an user especially for monitoring 
 Place the script to /var/prtg/scriptsxml on your Synology NAS and make it executable. (You may have to create this directory structure because PRTG expects the script here.)
 
 ```
-wget https://raw.githubusercontent.com/WAdama/nas_ab_status/master/nas_ab_status.sh
-or
-wget https://raw.githubusercontent.com/WAdama/nas_ab_status/master/nas_ab_status_m.sh
-chmod +x nas_ab_status.sh
+wget https://raw.githubusercontent.com/WAdama/nas_hb_status/master/nas_hb_status.sh
+chmod +x nas_hb_status.sh
 ```
 
 On your PRTG system place the file prtg.standardlookups.nas.abstatus.ovl in *INSTALLDIR\PRTG Network Monitor\lookups\custom* and refresh it under **System Administration / Administrative Tools**
