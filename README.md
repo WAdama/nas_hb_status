@@ -27,23 +27,21 @@ wget https://raw.githubusercontent.com/WAdama/nas_hb_status/master/nas_hb_status
 chmod +x nas_hb_status.sh
 ```
 
-On your PRTG system place the file prtg.standardlookups.nas.abstatus.ovl in *INSTALLDIR\PRTG Network Monitor\lookups\custom* and refresh it under **System Administration / Administrative Tools**
+On your PRTG system place the file prtg.standardlookups.nas.hbstatus.ovl in *INSTALLDIR\PRTG Network Monitor\lookups\custom* and refresh it under **System Administration / Administrative Tools**
 
 In PRTG create under your device which represents your Synology a SSH custom advanced senor.
 
-Choose under "Script" this script and enter under "Parameters" the name of the device backed up in Active Backup for Business you want to monitor: e.g. Server1.
+Choose under "Script" this script and enter under "Parameters" the name and path of your configuration file.
 
 ![Screenshot1](https://github.com/WAdama/nas_hb_status/blob/master/images/nas_hb_status.png)
 
-For the multiple device sensor create a conf file in your Synology's file system.
+For the sensor create a conf file in your Synology's file system.
 
-The configuration file must contain the following entry according to your devices:
+The configuration file must contain the following entry according to your backup tasks:
 
 ```
-DEVICE=(Device1 Device2 Server1 Server2)
+TASKS=("Backup - No1" "Backup - No2" "Backup - No3")
 ```
-Instead of the device name in "Parameters" enter path and name of config file.
-
 This script will set default values for limits in the Passed time channel:
 
 Upper warning limit: 36 h (129600 s)
