@@ -2,7 +2,7 @@
 
 Bash script for PRTG by Paessler to monitoring status of backups with Synology's Hyper Backup
 
-The sensor will show the status of the backups and the time passed since the last backup.
+The sensor will show the status of the backups and the time passed since the last backup. The data is collected from */var/log/synolog/synobackup.log*.
 
 Sensor has to be created in PRTG on your Synology device.
 
