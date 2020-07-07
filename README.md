@@ -42,7 +42,7 @@ The configuration file must contain the following entry according to your backup
 ```
 TASKS=("Backup - No1" "Backup - No2" "Backup - No3")
 ```
-This script will set default values for limits in the Passed time channel:
+This script will set default values for limits in the *Time passed* channel:
 
 Upper warning limit: 36 h (129600 s)
 
