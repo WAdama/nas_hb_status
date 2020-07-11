@@ -48,4 +48,6 @@ Upper warning limit: 36 h (129600 s)
 
 Upper error limit: 60 h (216000 s)
 
+**HINT:** If a backup runs the first time some values shown in the channels may not be valid because the value is not existing in the logs.
+
 ![Screenshot1](https://github.com/WAdama/nas_hb_status/blob/master/images/nas_hb_status_sensor.png)
