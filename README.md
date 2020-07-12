@@ -2,7 +2,7 @@
 
 Bash script for PRTG by Paessler to monitoring status of backup with Synology's Hyper Backup
 
-The sensor will show the status of the backups, time passed since the last backup, size and changed size of data. The data is collected from */var/log/synolog/synobackup.log* & */var/log/messages*.
+The sensor will show the status of the backups, integrity, time passed since the last backup, size and changed size of data. The data is collected from */var/log/synolog/synobackup.log* & */var/log/messages*.
 
 Sensor has to be created in PRTG on your Synology device.
 
@@ -47,7 +47,5 @@ This script will set default values for limits in the *Time passed* channel:
 Upper warning limit: 36 h (129600 s)
 
 Upper error limit: 60 h (216000 s)
-
-**HINT:** If a backup runs the first time some values shown in the channels may not be valid because the value is not existing in the logs.
 
 ![Screenshot1](https://github.com/WAdama/nas_hb_status/blob/master/images/nas_hb_status_sensor.png)
