@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <ValueLookup id="prtg.standardlookups.nas.hbintstatus" desiredValue="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="PaeValueLookup.xsd">
+    <Lookups>
+      <SingleInt state="None" value="0">
+        Not done yet
+      </SingleInt>
+      <SingleInt state="Ok" value="1">
+        No Error
+      </SingleInt>
+      <SingleInt state="Ok" value="2">
+        Running
+      </SingleInt>
+      <SingleInt state="Error" value="3">
+        Error found
+      </SingleInt>
+    </Lookups>
+  </ValueLookup>
