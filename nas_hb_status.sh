@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 1.2.0
+# Version 1.2.1
 
 CONF=$1
 source $CONF
@@ -24,8 +24,9 @@ if [ -z "${TASKID}" ]; then
 	LASTBKPSIZE=`cat $SYSLOG | grep "img_backup" | grep "$TASKID" | grep "Storage Statistics" | tail -1 | sed -n "s/^.*LastBackupTargetSize(KB):\[\s*\([0-9]*\).*$/\1/p"`
 fi
 TIME=`cat $LOG | grep "task" | grep "\[$TASK\]" | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}" | tail -1`
-
+INTTIME=`cat $LOG | grep "Backup integrity check" | grep "\[$TASK\]" | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}" | tail -1`
 TIMEEND=`date -d"$TIME" +%s`
+INTTIMEEND=`date -d"$INTTIME" +%s`
 
 if [[ $CONTENT == *"finished successfully"* ]]; then
 	STATUS="1"
@@ -55,10 +56,11 @@ fi
 
 ACTTIME=`date +%s`
 LASTRUN=$(($ACTTIME - $TIMEEND))
+INTLASTRUN=$(($ACTTIME - $INTTIMEEND))
 
 BKPCHANGE=$(($BKPSIZE - $LASTBKPSIZE))
 
-echo "<result><channel>$TASK: Time passed</channel><value>$LASTRUN</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>129600</LimitMaxWarning><LimitMaxError>216000</LimitMaxError></result><result><channel>$TASK: Status</channel><value>$STATUS</value><ValueLookup>prtg.standardlookups.nas.hbstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$TASK: Runtime</channel><value>$RUNTIME</value><unit>TimeSeconds</unit></result><result><channel>$TASK: Size</channel><value>$(($BKPSIZE * 1024))</value><unit>BytesDisk</unit></result><result><channel>$TASK: Change</channel><value>$(($BKPCHANGE * 1024))</value><unit>BytesDisk</unit></result><result><channel>$TASK: Integrity Check</channel><value>$INTSTATUS</value><ValueLookup>prtg.standardlookups.nas.hbintstatus</ValueLookup><ShowChart>0</ShowChart></result>"
+echo "<result><channel>$TASK: Last backup</channel><value>$LASTRUN</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>129600</LimitMaxWarning><LimitMaxError>216000</LimitMaxError></result><result><channel>$TASK: Status</channel><value>$STATUS</value><ValueLookup>prtg.standardlookups.nas.hbstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$TASK: Runtime</channel><value>$RUNTIME</value><unit>TimeSeconds</unit></result><result><channel>$TASK: Size</channel><value>$(($BKPSIZE * 1024))</value><unit>BytesDisk</unit></result><result><channel>$TASK: Change</channel><value>$(($BKPCHANGE * 1024))</value><unit>BytesDisk</unit></result><result><channel>$TASK: Integrity Check</channel><value>$INTSTATUS</value><ValueLookup>prtg.standardlookups.nas.hbintstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$TASK: Last integrity check</channel><value>$INTLASTRUN</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>608400</LimitMaxWarning><LimitMaxError>694800</LimitMaxError></result>"
 done
 echo "</prtg>"
 exit
