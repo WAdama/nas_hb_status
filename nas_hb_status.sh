@@ -1,18 +1,24 @@
 #!/bin/bash
-# Version 1.2.1
+# Version 1.2.2
 
 CONF=$1
 source $CONF
 
 LOG="/var/log/synolog/synobackup.log"
+LOGROTATED="/var/log/synolog/synobackup.log.0"
 SYSLOG="/var/log/messages"
 
 echo "<?xml version=\"10.0\" encoding=\"UTF-8\" ?><prtg>"
 for TASK in "${TASKS[@]}"
 do
-
 CONTENT=`cat $LOG | grep "task" | grep "\[$TASK\]" | tail -1`
+if [ -z "${CONTENT}" ]; then
+	CONTENT=`cat $LOGROTATED | grep "task" | grep "\[$TASK\]" | tail -1`
+fi
 INTEGRITY=`cat $LOG | grep "Backup integrity check" | grep "\[$TASK\]" | tail -1`
+if [ -z "${INTEGRITY}" ]; then
+	INTEGRITY=`cat $LOGROTATED | grep "Backup integrity check" | grep "\[$TASK\]" | tail -1`
+fi
 TASKID=`cat $SYSLOG | grep "task" | grep "\[$TASK\]" | tail -1 | sed -n "s/^.*img_backup: (\s*\([0-9]*\).*$/\1/p"`
 if [ -z "${TASKID}" ]; then
 	RUNTIME="0"
@@ -24,7 +30,14 @@ if [ -z "${TASKID}" ]; then
 	LASTBKPSIZE=`cat $SYSLOG | grep "img_backup" | grep "$TASKID" | grep "Storage Statistics" | tail -1 | sed -n "s/^.*LastBackupTargetSize(KB):\[\s*\([0-9]*\).*$/\1/p"`
 fi
 TIME=`cat $LOG | grep "task" | grep "\[$TASK\]" | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}" | tail -1`
+if [ -z "${TIME}" ]; then
+	TIME=`cat $LOGROTATED | grep "task" | grep "\[$TASK\]" | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}" | tail -1`
+fi
 INTTIME=`cat $LOG | grep "Backup integrity check" | grep "\[$TASK\]" | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}" | tail -1`
+if [ -z "${INTTIME}" ]; then
+	INTTIME=`cat $LOGROTATED | grep "Backup integrity check" | grep "\[$TASK\]" | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}" | tail -1`
+
+fi
 TIMEEND=`date -d"$TIME" +%s`
 INTTIMEEND=`date -d"$INTTIME" +%s`
 
