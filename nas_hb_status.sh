@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 1.2.2
+# Version 1.2.3
 
 CONF=$1
 source $CONF
@@ -55,6 +55,8 @@ if [[ $CONTENT == *"finished successfully"* ]]; then
 	STATUS="6"
 	elif [[ $CONTENT == *"resume backup"* ]]; then
 	STATUS="7"
+	elif [[ $CONTENT == *"partially completed"* ]]; then
+	STATUS="8"
 fi
 
 if [[ $INTEGRITY == *"No error was found"* ]]; then
