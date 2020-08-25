@@ -22,5 +22,8 @@
       <SingleInt state="Ok" value="7">
         Resumed
       </SingleInt>
+      <SingleInt state="Warning" value="8">
+        Partially completed
+      </SingleInt>
     </Lookups>
   </ValueLookup>
