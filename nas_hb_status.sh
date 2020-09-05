@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 1.2.3
+# Version 1.2.4
 
 CONF=$1
 source $CONF
@@ -65,6 +65,8 @@ if [[ $INTEGRITY == *"No error was found"* ]]; then
 	INTSTATUS="2"
 	elif [[ $INTEGRITY == *"target is found broken"* ]]; then
 	INTSTATUS="3"
+	elif [[ $INTEGRITY == *"Failed to run backup integrity check"* ]]; then
+	INTSTATUS="4"
 	else
 	INTSTATUS="0"
 fi
