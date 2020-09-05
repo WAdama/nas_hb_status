@@ -13,5 +13,8 @@
       <SingleInt state="Error" value="3">
         Error found
       </SingleInt>
+      <SingleInt state="Warning" value="4">
+        Failed to run
+      </SingleInt>
     </Lookups>
   </ValueLookup>
