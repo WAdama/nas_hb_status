@@ -4,10 +4,6 @@
 CONF=$1
 source $CONF
 
-LOG="/var/log/synolog/synobackup.log"
-LOGROTATED="/var/log/synolog/synobackup.log.0"
-SYSLOG="/var/log/messages"
-
 echo "<?xml version=\"10.0\" encoding=\"UTF-8\" ?><prtg>"
 for TASK in "${TASKS[@]}"
 do
