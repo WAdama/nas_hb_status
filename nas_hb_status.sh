@@ -11,9 +11,9 @@ CONTENT=`cat $LOG | grep "task" | grep "\[$TASK\]" | tail -1`
 if [ -z "${CONTENT}" ]; then
 	CONTENT=`cat $LOGROTATED | grep "task" | grep "\[$TASK\]" | tail -1`
 fi
-INTEGRITY=`cat $LOG | grep "Backup integrity check" | grep "\[$TASK\]" | tail -1`
+INTEGRITY=`cat $LOG | grep "integrity check" | grep "\[$TASK\]" | tail -1`
 if [ -z "${INTEGRITY}" ]; then
-	INTEGRITY=`cat $LOGROTATED | grep "Backup integrity check" | grep "\[$TASK\]" | tail -1`
+	INTEGRITY=`cat $LOGROTATED | grep "integrity check" | grep "\[$TASK\]" | tail -1`
 fi
 TASKID=`cat $SYSLOG | grep "task" | grep "\[$TASK\]" | tail -1 | sed -n "s/^.*img_backup: (\s*\([0-9]*\).*$/\1/p"`
 if [ -z "${TASKID}" ]; then
