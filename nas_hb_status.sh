@@ -34,8 +34,8 @@ if [ -z "${INTTIME}" ]; then
 	INTTIME=`cat $LOGROTATED | grep "Backup integrity check" | grep "\[$TASK\]" | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}" | tail -1`
 
 fi
-TIMEEND=`date -d"$TIME" +%s`
-INTTIMEEND=`date -d"$INTTIME" +%s`
+TIMEEND=`date -d "$TIME" +%s`
+INTTIMEEND=`date -d "$INTTIME" +%s`
 
 if [[ $CONTENT == *"finished successfully"* ]]; then
 	STATUS="1"
