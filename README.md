@@ -59,4 +59,4 @@ Upper error limit: 8 d 1h (694800 s)
 
 **Hint:** If you created your sensor with an earlier version please create it new when you use the actual version. I've changed the name for channel *Time passed* to *Last backup*
 
-![Screenshot1](https://github.com/WAdama/nas_hb_status/blob/master/images/nas_hb_status_sensor.png)
+![Screenshot1](./images/nas_hb_status_sensor.png)
