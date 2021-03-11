@@ -33,7 +33,7 @@ In PRTG create under your device which represents your Synology a SSH custom adv
 
 Choose under "Script" this script and enter under "Parameters" the name and path of your configuration file.
 
-![Screenshot1](https://github.com/WAdama/nas_hb_status/blob/master/images/nas_hb_status.png)
+![Screenshot1](./images/nas_hb_status.png)
 
 For the sensor create a conf file in the chosen path.
 
