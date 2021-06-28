@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 1.2.4
+# Version 1.2.5
 
 CONF=$1
 source $CONF
@@ -15,7 +15,7 @@ INTEGRITY=`cat $LOG | grep "integrity check" | grep "\[$TASK\]" | tail -1`
 if [ -z "${INTEGRITY}" ]; then
 	INTEGRITY=`cat $LOGROTATED | grep "integrity check" | grep "\[$TASK\]" | tail -1`
 fi
-TASKID=`cat $SYSLOG | grep "task" | grep "\[$TASK\]" | tail -1 | sed -n "s/^.*img_backup: (\s*\([0-9]*\).*$/\1/p"`
+TASKID=`cat $SYSLOG | grep "task" | grep "\[$TASK\]" | tail -1 | sed -n "s/^.*: (\s*\([0-9]*\).*$/\1/p"`
 if [ -z "${TASKID}" ]; then
 	RUNTIME="0"
 	BKPSIZE="0"
