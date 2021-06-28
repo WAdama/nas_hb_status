@@ -7,6 +7,7 @@ The sensor will show the status of the backups, integrity, time passed since the
 Sensor has to be created in PRTG on your Synology device.
 
 Sensor tested on DS 918+ with DSM 6.2.4-25556 and Hyper Backup 2.2.6-1316
+
 Sensor tested on DS 420+ with DSM 7.0-41882 RC and Hyper Backup 3.0.0-2277 
 
 ### Prerequisites
