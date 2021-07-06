@@ -25,5 +25,8 @@
       <SingleInt state="Warning" value="8">
         Partially completed
       </SingleInt>
+      <SingleInt state="Ok" value="9">
+        Ready to delete version
+      </SingleInt>
     </Lookups>
   </ValueLookup>
