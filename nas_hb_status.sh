@@ -7,27 +7,27 @@ source $CONF
 echo "<?xml version=\"10.0\" encoding=\"UTF-8\" ?><prtg>"
 for TASK in "${TASKS[@]}"
 do
-CONTENT=`cat $LOG | grep "task" | grep "\[$TASK\]" | tail -1`
+CONTENT=`cat $LOG | grep "Backup task" | grep "\[$TASK\]" | tail -1`
 if [ -z "${CONTENT}" ]; then
-	CONTENT=`cat $LOGROTATED | grep "task" | grep "\[$TASK\]" | tail -1`
+	CONTENT=`cat $LOGROTATED | grep "Backup task" | grep "\[$TASK\]" | tail -1`
 fi
 INTEGRITY=`cat $LOG | grep "integrity check" | grep "\[$TASK\]" | tail -1`
 if [ -z "${INTEGRITY}" ]; then
 	INTEGRITY=`cat $LOGROTATED | grep "integrity check" | grep "\[$TASK\]" | tail -1`
 fi
-TASKID=`cat $SYSLOG | grep "task" | grep "\[$TASK\]" | tail -1 | sed -n "s/^.*: (\s*\([0-9]*\).*$/\1/p"`
+TASKID=`cat $SYSLOG | grep "Backup task" | grep "\[$TASK\]" | tail -1 | sed -n "s/^.*: (\s*\([0-9]*\).*$/\1/p"`
 if [ -z "${TASKID}" ]; then
 	RUNTIME="0"
 	BKPSIZE="0"
 	LASTBKPSIZE="0"
 	else
-	RUNTIME=`cat $SYSLOG | grep "task" | grep "\[$TASK\]" | tail -1 | sed -n "s/^.*Time spent: \[\s*\([0-9]*\).*$/\1/p"`
+	RUNTIME=`cat $SYSLOG | grep "Backup task" | grep "\[$TASK\]" | tail -1 | sed -n "s/^.*Time spent: \[\s*\([0-9]*\).*$/\1/p"`
 	BKPSIZE=`cat $SYSLOG | grep "img_backup" | grep "$TASKID" | grep "Storage Statistics" | tail -1 | sed -n "s/^.*: TargetSize(KB):\[\s*\([0-9]*\).*$/\1/p"`
 	LASTBKPSIZE=`cat $SYSLOG | grep "img_backup" | grep "$TASKID" | grep "Storage Statistics" | tail -1 | sed -n "s/^.*LastBackupTargetSize(KB):\[\s*\([0-9]*\).*$/\1/p"`
 fi
-TIME=`cat $LOG | grep "task" | grep "\[$TASK\]" | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}" | tail -1`
+TIME=`cat $LOG | grep "Backup task" | grep "\[$TASK\]" | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}" | tail -1`
 if [ -z "${TIME}" ]; then
-	TIME=`cat $LOGROTATED | grep "task" | grep "\[$TASK\]" | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}" | tail -1`
+	TIME=`cat $LOGROTATED | grep "Backup task" | grep "\[$TASK\]" | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}" | tail -1`
 fi
 INTTIME=`cat $LOG | grep "Backup integrity check" | grep "\[$TASK\]" | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}" | tail -1`
 if [ -z "${INTTIME}" ]; then
@@ -53,8 +53,6 @@ if [[ $CONTENT == *"finished successfully"* ]]; then
 	STATUS="7"
 	elif [[ $CONTENT == *"partially completed"* ]]; then
 	STATUS="8"
-	elif [[ $CONTENT == *"Ready to delete version"* ]]; then
-	STATUS="9"
 fi
 
 if [[ $INTEGRITY == *"No error was found"* ]]; then
