@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 1.2.5
+# Version 1.2.6
 
 CONF=$1
 source $CONF
@@ -53,6 +53,8 @@ if [[ $CONTENT == *"finished successfully"* ]]; then
 	STATUS="7"
 	elif [[ $CONTENT == *"partially completed"* ]]; then
 	STATUS="8"
+	elif [[ $CONTENT == *"Ready to delete version"* ]]; then
+	STATUS="9"
 fi
 
 if [[ $INTEGRITY == *"No error was found"* ]]; then
