@@ -2,7 +2,7 @@
   <ValueLookup id="prtg.standardlookups.nas.hbintstatus" desiredValue="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="PaeValueLookup.xsd">
     <Lookups>
       <SingleInt state="None" value="0">
-        Not done yet
+        Not run yet
       </SingleInt>
       <SingleInt state="Ok" value="1">
         No Error
