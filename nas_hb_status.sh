@@ -1,6 +1,7 @@
 #!/bin/bash
 # Version 1.3
 
+#Load configuration file
 source $1
 
 echo "<?xml version=\"10.0\" encoding=\"UTF-8\" ?><prtg>"
