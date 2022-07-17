@@ -39,7 +39,7 @@ Choose under "Script" this script and enter under "Parameters" the name and path
 
 For the sensor create a conf file in the chosen path.
 
-The configuration file must contain the following entries according to your backup tasks and the path and names of the needed logs:
+The configuration file must contain the following entries according to your backup tasks:
 
 ```
 BKP_TASKS=("Backup - No1" "Backup - No2" "Backup - No3")
