@@ -28,5 +28,11 @@
       <SingleInt state="Warning" value="8">
         Partially completed
       </SingleInt>
+      <SingleInt state="Warning" value="9">
+        Discarding backup
+      </SingleInt>
+      <SingleInt state="Warning" value="10">
+        Discarded successfully
+      </SingleInt>
     </Lookups>
   </ValueLookup>
