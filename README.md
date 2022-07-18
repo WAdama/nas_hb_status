@@ -18,7 +18,7 @@ I personally use "Login via private key" with an user especially for monitoring 
 
 ![Screenshot1](./images/ssh_settings.png)
 
-**HINT:** Since DSM 6.2.2 for SSH access the user has to be member of the local Administrators group on your Synology NAS.
+**HINT:** Since DSM 6.2.2 for SSH access the user has to be member of the local administrators group on your Synology NAS.
 
 ### Installing
 
