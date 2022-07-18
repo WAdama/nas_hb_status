@@ -29,7 +29,7 @@ wget https://raw.githubusercontent.com/WAdama/nas_hb_status/master/nas_hb_status
 chmod +x nas_hb_status.sh
 ```
 
-On your PRTG system place the file prtg.standardlookups.nas.hbstatus.ovl and prtg.standardlookups.nas.hbintstatus.ovl in *INSTALLDIR\PRTG Network Monitor\lookups\custom* and refresh it under **System Administration / Administrative Tools**
+On your PRTG system place the files prtg.standardlookups.nas.hbstatus.ovl and prtg.standardlookups.nas.hbintstatus.ovl in *INSTALLDIR\PRTG Network Monitor\lookups\custom* and refresh it under **System Administration / Administrative Tools**
 
 In PRTG create under your device which represents your Synology a SSH custom advanced senor.
 
