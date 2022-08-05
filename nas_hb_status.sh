@@ -1,12 +1,11 @@
 #!/bin/bash
-# Version 2.0
+# Version 2.0.1
 
-#Load configuration file
+#Load configuration file and set variables
 source $1
-LOGS=$(ls -1r /var/log/synolog/synobackup.log*)
-SYSLOG="/var/log/messages"
-#LOGS=$(ls -1r /volume1/Temp/PRTG/log/synolog/synobackup.log*)
-#SYSLOG="/volume1/Temp/PRTG/log/messages"
+LOGPATH="/var/log"
+SYSLOG="$LOGPATH/messages"
+LOGS=$(ls -1r $LOGPATH/synolog/synobackup.*[!.xz])
 TIME=$(date +%s)
 
 echo "<?xml version=\"10.0\" encoding=\"UTF-8\" ?><prtg>"
