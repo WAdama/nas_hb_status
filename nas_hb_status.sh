@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.0.2
+# Version 2.0.3
 
 #Load configuration file
 source "$1"
@@ -89,7 +89,6 @@ do
 			BKP_TIME_INT_END=$(date -d "$BKP_TIME_INT_END" +%s)
 			BKP_LAST_RUN_INT=$(("$TIME"-"$BKP_TIME_INT_END"))
 		fi
-		BKP_TIME_INT=$(awk "/Backup integrity check/ && /\[$BKP_TASK\]/" "$LOGS" | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
 		BKP_LAST_RUN=$(("$TIME"-"$BKP_TIME_END"))
 		BKP_RUNTIME_INT=$(("$BKP_TIME_INT_END"-"$BKP_TIME_INT_STRT"))
 	fi
