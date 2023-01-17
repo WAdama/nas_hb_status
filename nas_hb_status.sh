@@ -1,8 +1,8 @@
 #!/bin/bash
-# Version 2.0.1
+# Version 2.0.2
 
-#Load configuration file and set variables
-source $1
+#Load configuration file
+source "$1"
 LOGPATH="/var/log"
 SYSLOG="$LOGPATH/messages"
 LOGS=$(ls -1r $LOGPATH/synolog/synobackup.*[!.xz])
@@ -13,9 +13,9 @@ echo "<?xml version=\"10.0\" encoding=\"UTF-8\" ?><prtg>"
 for BKP_TASK in "${BKP_TASKS[@]}"
 do
 	#Getting backup status data
-	BKP_RESULT=$(awk "/task/ && /\[$BKP_TASK\]/" $LOGS | tail -1)
-	BKP_RESULT_INT=$(awk "/integrity check/ && /\[$BKP_TASK\]/" $LOGS | tail -1)
-	BKP_TASKID=$(awk "/task/ && /\[$BKP_TASK\]/" $SYSLOG | tail -1 | sed -n "s/^.*: (\s*\([0-9]*\).*$/\1/p")
+	BKP_RESULT=$(awk "/task/ && /\[$BKP_TASK\]/" "$LOGS" | tail -1)
+	BKP_RESULT_INT=$(awk "/integrity check/ && /\[$BKP_TASK\]/" "$LOGS" | tail -1)
+	BKP_TASKID=$(awk "/task/ && /\[$BKP_TASK\]/" "$SYSLOG" | tail -1 | sed -n "s/^.*: (\s*\([0-9]*\).*$/\1/p")
 	#Setting value for status of last backup
 	case $BKP_RESULT in
 		*"finished successfully"*) BKP_STATUS="1" ;;
@@ -52,60 +52,60 @@ do
 		BKP_LAST_RUN_INT="0"
 	else
 		#Getting and calculating backup sizes
-		BKP_SIZE=$(awk "/img_backup/ && /$BKP_TASKID/ && /Storage Statistics/" $SYSLOG | tail -1 | sed -n "s/^.*: TargetSize(KB):\[\s*\([0-9]*\).*$/\1/p")
-		BKP_SIZE=$(($BKP_SIZE * 1024))
-		BKP_SIZE_LAST=$(awk "/img_backup/ && /$BKP_TASKID/ && /Storage Statistics/" $SYSLOG | tail -1 | sed -n "s/^.*LastBackupTargetSize(KB):\[\s*\([0-9]*\).*$/\1/p")
-		BKP_SIZE_LAST=$(($BKP_SIZE_LAST * 1024))
-		BKP_CHANGE=$(($BKP_SIZE - $BKP_SIZE_LAST))
+		BKP_SIZE=$(awk "/img_backup/ && /$BKP_TASKID/ && /Storage Statistics/" "$SYSLOG" | tail -1 | sed -n "s/^.*: TargetSize(KB):\[\s*\([0-9]*\).*$/\1/p")
+		BKP_SIZE=$(("$BKP_SIZE"*1024))
+		BKP_SIZE_LAST=$(awk "/img_backup/ && /$BKP_TASKID/ && /Storage Statistics/" "$SYSLOG" | tail -1 | sed -n "s/^.*LastBackupTargetSize(KB):\[\s*\([0-9]*\).*$/\1/p")
+		BKP_SIZE_LAST=$(("$BKP_SIZE_LAST"*1024))
+		BKP_CHANGE=$(("$BKP_SIZE"-"$BKP_SIZE_LAST"))
 		#Getting and calculating times
-		BKP_RUNTIME=$(awk "/Backup task/ && /\[$BKP_TASK\]/" $SYSLOG | tail -1 | sed -n "s/^.*Time spent: \[\s*\([0-9]*\).*$/\1/p")
-		BKP_TIME_STRT=$(awk "/Backup task/ && /started/ && /\[$BKP_TASK\]/" $LOGS | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
+		BKP_RUNTIME=$(awk "/Backup task/ && /\[$BKP_TASK\]/" "$SYSLOG" | tail -1 | sed -n "s/^.*Time spent: \[\s*\([0-9]*\).*$/\1/p")
+		BKP_TIME_STRT=$(awk "/Backup task/ && /started/ && /\[$BKP_TASK\]/" "$LOGS" | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
 		if [ -z "${BKP_TIME_STRT}" ]; then
 			BKP_TIME_STRT="0"
 		else
 			BKP_TIME_STRT=$(date -d "$BKP_TIME_STRT" +%s)
 		fi
-		BKP_TIME_RESD=$(awk "/backup task/ && /resume/ && /\[$BKP_TASK\]/" $LOGS | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
-		if [ -n "${BKP_TIME_RESD}" ] && [ BKP_STATUS == 7 ]; then
+		BKP_TIME_RESD=$(awk "/backup task/ && /resume/ && /\[$BKP_TASK\]/" "$LOGS" | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
+		if [ -n "${BKP_TIME_RESD}" ] && [ "${BKP_STATUS}" == 7 ]; then
 			BKP_TIME_STRT=$(date -d "$BKP_TIME_RESD" +%s)
 		fi
-		BKP_TIME_END=$(awk "/Backup task/ && /finished/ && /\[$BKP_TASK\]/" $LOGS | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
+		BKP_TIME_END=$(awk "/Backup task/ && /finished/ && /\[$BKP_TASK\]/" "$LOGS" | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
 		if [ -z "${BKP_TIME_END}" ]; then
 			BKP_TIME_END="0"
 		else
 			BKP_TIME_END=$(date -d "$BKP_TIME_END" +%s)
 		fi
-		BKP_TIME_INT_STRT=$(awk "/Backup integrity check/ && /started/ && /\[$BKP_TASK\]/" $LOGS | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
+		BKP_TIME_INT_STRT=$(awk "/Backup integrity check/ && /started/ && /\[$BKP_TASK\]/" "$LOGS" | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
 		if [ -z "${BKP_TIME_INT_STRT}" ]; then
 			BKP_TIME_INT_STRT="0"
 		else
 			BKP_TIME_INT_STRT=$(date -d "$BKP_TIME_INT_STRT" +%s)
 		fi
-		BKP_TIME_INT_END=$(awk "/Backup integrity check/ && /finished/ && /\[$BKP_TASK\]/" $LOGS | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
+		BKP_TIME_INT_END=$(awk "/Backup integrity check/ && /finished/ && /\[$BKP_TASK\]/" "$LOGS" | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
 		if [ -z "${BKP_TIME_INT_END}" ]; then
 			BKP_TIME_INT_END="0"
 			BKP_LAST_RUN_INT="0"
 		else
 			BKP_TIME_INT_END=$(date -d "$BKP_TIME_INT_END" +%s)
-			BKP_LAST_RUN_INT=$(($TIME - $BKP_TIME_INT_END))
+			BKP_LAST_RUN_INT=$(("$TIME"-"$BKP_TIME_INT_END"))
 		fi
-		BKP_TIME_INT=$(awk "/Backup integrity check/ && /\[$BKP_TASK\]/" $LOGS | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
-		BKP_LAST_RUN=$(($TIME - $BKP_TIME_END))
-		BKP_RUNTIME_INT=$(($BKP_TIME_INT_END - $BKP_TIME_INT_STRT))
+		BKP_TIME_INT=$(awk "/Backup integrity check/ && /\[$BKP_TASK\]/" "$LOGS" | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
+		BKP_LAST_RUN=$(("$TIME"-"$BKP_TIME_END"))
+		BKP_RUNTIME_INT=$(("$BKP_TIME_INT_END"-"$BKP_TIME_INT_STRT"))
 	fi
 	#Setting times during runtime
-	if [ $BKP_STATUS == 4 ] || [ $BKP_STATUS == 7 ]; then
-		BKP_RUNTIME=$(($TIME - $BKP_TIME_STRT))
-		BKP_LAST_RUN=$(($TIME - $BKP_TIME_END))
+	if [ "$BKP_STATUS" == 4 ] || [ "$BKP_STATUS" == 7 ]; then
+		BKP_RUNTIME=$(("$TIME"-"$BKP_TIME_STRT"))
+		BKP_LAST_RUN=$(("$TIME"-"$BKP_TIME_END"))
 	fi
-	if [ $BKP_TIME_END == 0 ]; then
+	if [ "$BKP_TIME_END" == 0 ]; then
 		BKP_LAST_RUN="0"
 	fi
-	if [ $BKP_STATUS_INT == 2 ]; then
-		BKP_RUNTIME_INT=$(($TIME - $BKP_TIME_INT_STRT))
-		BKP_LAST_RUN_INT=$(($TIME - $BKP_TIME_INT_END))
+	if [ "$BKP_STATUS_INT" == 2 ]; then
+		BKP_RUNTIME_INT=$(("$TIME"-"$BKP_TIME_INT_STRT"))
+		BKP_LAST_RUN_INT=$(("$TIME"-"$BKP_TIME_INT_END"))
 	fi
-	if [ $BKP_TIME_INT_END == 0 ]; then
+	if [ "$BKP_TIME_INT_END" == 0 ]; then
 		BKP_LAST_RUN_INT="0"
 	fi
 	#Creating sensor
