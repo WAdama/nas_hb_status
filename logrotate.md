@@ -1,4 +1,4 @@
-Edit file HyperBackup and enter "nocompress" for HyperBackup logs:
+Edit file **HyperBackup** and enter **nocompress** for HyperBackup logs:
 
 vi /usr/local/etc/logrotate.d/HyperBackup
 
