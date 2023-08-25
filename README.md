@@ -10,7 +10,7 @@ Sensor tested on DS 918+ and DS 420+ with DSM 7.1 and newer / Hyper Backup 3.0 a
 
 **HINT:** I have noticed after upgrading to DSM 7 it seems the log doesn't contain values of the last backups anymore. So wait for the next backup for valid data.
 
-**Known issues:** Through log rotation it possible the sensor gets no data for the last backup. To prevent this you have to edit the config file for this logs, see [Change config for HyperBackup logs](logrotate.md) 
+**Known issues:** Through log rotation it possible the sensor gets no data for the last backup. To prevent this you have to edit the config file for this logs, see [Change logrotate config for HyperBackup logs](logrotate.md) 
 
 ### Prerequisites
 
