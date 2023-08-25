@@ -1,8 +1,6 @@
-Logon to DSM via SSH
-
-Change to "/usr/local/etc/logrotate.d"
-
 Edit file HyperBackup and enter "nocompress" for HyperBackup logs:
+
+vi /usr/local/etc/logrotate.d/HyperBackup
 
 ```
 /var/log/synohbkpvfs.log {
@@ -14,7 +12,8 @@ Edit file HyperBackup and enter "nocompress" for HyperBackup logs:
 
 /var/packages/HyperBackup/var/log/*.log {
     missingok
-    **nocompress**
+    #prohibit compression of HyperBackup logs:
+    nocompress
     postrotate
         /usr/syno/bin/synosystemctl reload syslog-ng || true
     endscript
