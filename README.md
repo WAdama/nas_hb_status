@@ -6,11 +6,9 @@ The sensor will show the status of the backups, integrity, time passed since the
 
 Sensor has to be created in PRTG on your Synology device.
 
-Sensor tested on DS 918+ and DS 420+ with DSM 7.1 and newer / Hyper Backup 3.0 and newer and on DS 413 with DSM 6.2.4-25556 / Hyper Backup 2.2.9-1520.
+Sensor tested on DS 918+ with DSM 7.2 and newer / Hyper Backup 4.1 and newer and Cloud Backup (HiDrive) and Remote NAS backup to Hyper Backup Vault to DSM 7.2 and 6.2.4. Should work with older verions, too.
 
-**HINT:** I have noticed after upgrading to DSM 7 it seems the log doesn't contain values of the last backups anymore. So wait for the next backup for valid data.
-
-**Known issues:** In HB 4.1 through log rotation it possible the sensor gets no data for the last backup. To prevent this you have to edit the config file for this logs, see [Change logrotate config for HyperBackup logs](logrotate.md) 
+**Note:** Since Hyper Backup version 4.1 there is a separate log in a different directory. Log rotation may result in no values being returned as all older logs are packed. This can only be circumvented by adjusting the log rotation: [Change logrotate config for HyperBackup logs](logrotate.md) 
 
 ### Prerequisites
 
