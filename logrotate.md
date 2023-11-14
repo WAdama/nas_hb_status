@@ -19,3 +19,5 @@ vi /usr/local/etc/logrotate.d/HyperBackup
     endscript
 }
 ```
+
+**Note:** This has to be done after every DSM or Hyper Backup update.
