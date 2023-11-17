@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.1.0
+# Version 2.1.1
 
 #Load configuration file
 source "$1"
@@ -8,7 +8,7 @@ VERSIONHB=$(/usr/syno/bin/synopkg version HyperBackup)
 VERSION=${VERSIONHB:0:1}${VERSIONHB:2:1}
 if [ "$VERSION" -gt "40" ]
 then
-    mapfile -t SYSLOG < <( ls -1r /volume1/@appdata/HyperBackup/log/hyperbackup.l*[!.xz] )
+    mapfile -t SYSLOG < <( ls -1r /volume1/@appdata/HyperBackup/log/hyperbackup.l*[!.xz] | tail -2 )
 else
     SYSLOG=("/var/log/messages")
 fi
@@ -59,10 +59,8 @@ do
         BKP_TIME_INT_END="0"
         BKP_LAST_RUN_INT="0"
     else
-        BKP_SIZE=$(awk "/img_backup/ && /$BKP_TASKID/ && /TargetSize/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*: TargetSize(KB):\[\s*\([0-9]*\).*$/\1/p")
-        BKP_SIZE=$(("$BKP_SIZE"*1024))
-        BKP_SIZE_LAST=$(awk "/img_backup/ && /$BKP_TASKID/ && /TargetSize/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*LastBackupTargetSize(KB):\[\s*\([0-9]*\).*$/\1/p")
-        BKP_SIZE_LAST=$(("$BKP_SIZE_LAST"*1024))
+        BKP_SIZE=$(("$(awk "/img_backup/ && /$BKP_TASKID/ && /TargetSize/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*: TargetSize(KB):\[\s*\([0-9]*\).*$/\1/p")"*1024))
+        BKP_SIZE_LAST=$(("$(awk "/img_backup/ && /$BKP_TASKID/ && /TargetSize/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*LastBackupTargetSize(KB):\[\s*\([0-9]*\).*$/\1/p")"*1024))
         BKP_CHANGE=$(("$BKP_SIZE"-"$BKP_SIZE_LAST"))
         #Getting and calculating times
         BKP_RUNTIME=$(awk "/Backup task/ && /\[$BKP_TASK\]/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*Time spent: \[\s*\([0-9]*\).*$/\1/p")
@@ -98,6 +96,12 @@ do
         fi
         BKP_LAST_RUN=$(("$TIME"-"$BKP_TIME_END"))
         BKP_RUNTIME_INT=$(("$BKP_TIME_INT_END"-"$BKP_TIME_INT_STRT"))
+        if [ "$BKP_TIME_END" != 0 ]; then
+            BKP_REAL_STRT=$(date -d "$(awk "/\[BkpCtrl\]/ && /\[$BKP_TASKID\]/" "${SYSLOG[@]}" | tail -1 | grep -o "[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}T[0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")" +%s)
+            BKP_REAL_END=$(date -d "$(awk "/\[BackupTaskFinished\]/ && /\[$BKP_TASKID\]/" "${SYSLOG[@]}" | tail -1 | grep -o "[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}T[0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")" +%s)
+            BKP_REALRUNTIME=$(("$BKP_REAL_END"-"$BKP_REAL_STRT"))
+            BKP_SPEED=$(("$BKP_CHANGE"/"$BKP_REALRUNTIME"))
+        fi
     fi
     #Setting times when backup is running
     if [ "$BKP_STATUS" == 4 ] || [ "$BKP_STATUS" == 7 ]; then
@@ -115,7 +119,7 @@ do
         BKP_LAST_RUN_INT="0"
     fi
     #Creating sensor
-    echo "<result><channel>$BKP_TASK: Last backup</channel><value>$BKP_LAST_RUN</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>129600</LimitMaxWarning><LimitMaxError>216000</LimitMaxError></result><result><channel>$BKP_TASK: Status</channel><value>$BKP_STATUS</value><ValueLookup>prtg.standardlookups.nas.hbstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$BKP_TASK: Backup Runtime</channel><value>$BKP_RUNTIME</value><unit>TimeSeconds</unit></result><result><channel>$BKP_TASK: Size</channel><value>$BKP_SIZE</value><unit>BytesDisk</unit></result><result><channel>$BKP_TASK: Change</channel><value>$BKP_CHANGE</value><unit>BytesDisk</unit></result><result><channel>$BKP_TASK: Integrity Check</channel><value>$BKP_STATUS_INT</value><ValueLookup>prtg.standardlookups.nas.hbintstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$BKP_TASK: Last Integrity Check</channel><value>$BKP_LAST_RUN_INT</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>608400</LimitMaxWarning><LimitMaxError>694800</LimitMaxError></result><result><channel>$BKP_TASK: Integrity Check Runtime</channel><value>$BKP_RUNTIME_INT</value><unit>TimeSeconds</unit></result>"
+    echo "<result><channel>$BKP_TASK: Last backup</channel><value>$BKP_LAST_RUN</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>129600</LimitMaxWarning><LimitMaxError>216000</LimitMaxError></result><result><channel>$BKP_TASK: Status</channel><value>$BKP_STATUS</value><ValueLookup>prtg.standardlookups.nas.hbstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$BKP_TASK: Backup Runtime</channel><value>$BKP_RUNTIME</value><unit>TimeSeconds</unit></result><result><channel>$BKP_TASK: Size</channel><value>$BKP_SIZE</value><unit>BytesDisk</unit><VolumeSize>GigaByte</VolumeSize></result><result><channel>$BKP_TASK: Change</channel><value>$BKP_CHANGE</value><unit>BytesDisk</unit><VolumeSize>GigaByte</VolumeSize></result><result><channel>$BKP_TASK: Speed</channel><value>$BKP_SPEED</value><unit>SpeedDisk</unit><SpeedSize>MegaByte</SpeedSize></result><result><channel>$BKP_TASK: Integrity Check</channel><value>$BKP_STATUS_INT</value><ValueLookup>prtg.standardlookups.nas.hbintstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$BKP_TASK: Last Integrity Check</channel><value>$BKP_LAST_RUN_INT</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>608400</LimitMaxWarning><LimitMaxError>694800</LimitMaxError></result><result><channel>$BKP_TASK: Integrity Check Runtime</channel><value>$BKP_RUNTIME_INT</value><unit>TimeSeconds</unit></result>"
 done
 echo "</prtg>"
 exit
