@@ -1,8 +1,5 @@
-Edit file **HyperBackup** and enter **nocompress** for HyperBackup logs:
+# Version 1.0
 
-vi /usr/local/etc/logrotate.d/HyperBackup
-
-```
 /var/log/synohbkpvfs.log {
     missingok
     postrotate
@@ -18,6 +15,3 @@ vi /usr/local/etc/logrotate.d/HyperBackup
         /usr/syno/bin/synosystemctl reload syslog-ng || true
     endscript
 }
-```
-
-**Note:** This has to be done after every DSM or Hyper Backup update.
