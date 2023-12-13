@@ -8,7 +8,7 @@ Sensor has to be created in PRTG on your Synology device.
 
 Sensor tested on DS 918+ with DSM 7.2 and newer / Hyper Backup 4.1 and newer and Cloud Backup (HiDrive) and Remote NAS backup to Hyper Backup Vault to DSM 7.2 and 6.2.4. Should work with older verions, too.
 
-**Note:** Since Hyper Backup version 4.1 there is a separate log in a different directory. Log rotation may result in no values being returned as all older logs are packed. This can only be circumvented by adjusting the log rotation: [Change logrotate config for HyperBackup logs](logrotate.md) 
+**Note:** Since Hyper Backup version 4.1 there is a separate log in a different directory. Log rotation may result in no values being returned as all older logs are packed. The script will update the /usr/local/etc/logrotate.d/HyperBackup file if needed
 
 ### Prerequisites
 
