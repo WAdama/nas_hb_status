@@ -1,5 +1,6 @@
 #!/bin/bash
 # Version 2.1.1
+# Version 2.1.2
 
 #Load configuration file
 source "$1"
@@ -8,6 +9,12 @@ VERSIONHB=$(/usr/syno/bin/synopkg version HyperBackup)
 VERSION=${VERSIONHB:0:1}${VERSIONHB:2:1}
 if [ "$VERSION" -gt "40" ]
 then
+	if ! grep -q "1.0" /usr/local/etc/logrotate.d/HyperBackup; then
+		echo "- Logrotate is not correctly set - correcting"
+		wget -qO "/usr/local/etc/logrotate.d/HyperBackup" https://github.com/async-it/nas_hb_status/raw/master/logrotate && chmod +x "/usr/local/etc/logrotate.d/HyperBackup"
+	else
+		echo "- Logrotate is correctly set"
+	fi
     mapfile -t SYSLOG < <( ls -1r /volume1/@appdata/HyperBackup/log/hyperbackup.l*[!.xz] | tail -2 )
 else
     SYSLOG=("/var/log/messages")
