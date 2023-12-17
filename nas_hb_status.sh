@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.1.1
+# Version 2.1.2
 
 #Load configuration file
 source "$1"
@@ -8,11 +8,15 @@ VERSIONHB=$(/usr/syno/bin/synopkg version HyperBackup)
 VERSION=${VERSIONHB:0:1}${VERSIONHB:2:1}
 if [ "$VERSION" -gt "40" ]
 then
-    mapfile -t SYSLOG < <( ls -1r /volume1/@appdata/HyperBackup/log/hyperbackup.l*[!.xz] | tail -2 )
+    mapfile -t SYSLOG < <( find /volume1/@appdata/HyperBackup/log/hyperbackup.l*[!.xz] | sort -r | tail -2 )
+    if find /volume1/@appdata/HyperBackup/log/hyperbackup.*.xz > /dev/null 2>&1
+    then
+        MESSAGE="Compression for log file active. This may obstruct the sensor data!"
+    fi
 else
     SYSLOG=("/var/log/messages")
 fi
-mapfile -t LOGS < <( ls -1r /var/log/synolog/synobackup.l*[!.xz] )
+mapfile -t LOGS < <( find /var/log/synolog/synobackup.l*[!.xz] | sort -r )
 TIME=$(date +%s)
 
 echo "<?xml version=\"10.0\" encoding=\"UTF-8\" ?><prtg>"
@@ -121,5 +125,8 @@ do
     #Creating sensor
     echo "<result><channel>$BKP_TASK: Last backup</channel><value>$BKP_LAST_RUN</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>129600</LimitMaxWarning><LimitMaxError>216000</LimitMaxError></result><result><channel>$BKP_TASK: Status</channel><value>$BKP_STATUS</value><ValueLookup>prtg.standardlookups.nas.hbstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$BKP_TASK: Backup Runtime</channel><value>$BKP_RUNTIME</value><unit>TimeSeconds</unit></result><result><channel>$BKP_TASK: Size</channel><value>$BKP_SIZE</value><unit>BytesDisk</unit><VolumeSize>GigaByte</VolumeSize></result><result><channel>$BKP_TASK: Change</channel><value>$BKP_CHANGE</value><unit>BytesDisk</unit><VolumeSize>GigaByte</VolumeSize></result><result><channel>$BKP_TASK: Speed</channel><value>$BKP_SPEED</value><unit>SpeedDisk</unit><SpeedSize>MegaByte</SpeedSize></result><result><channel>$BKP_TASK: Integrity Check</channel><value>$BKP_STATUS_INT</value><ValueLookup>prtg.standardlookups.nas.hbintstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$BKP_TASK: Last Integrity Check</channel><value>$BKP_LAST_RUN_INT</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>608400</LimitMaxWarning><LimitMaxError>694800</LimitMaxError></result><result><channel>$BKP_TASK: Integrity Check Runtime</channel><value>$BKP_RUNTIME_INT</value><unit>TimeSeconds</unit></result>"
 done
+if [ "${MESSAGE}" ]; then
+    echo "<text>$MESSAGE</text>"
+fi
 echo "</prtg>"
 exit
