@@ -12,8 +12,9 @@ vi /usr/local/etc/logrotate.d/HyperBackup
 
 /var/packages/HyperBackup/var/log/*.log {
     missingok
-    #prohibit compression of HyperBackup logs:
+    #added
     nocompress
+    #added
     postrotate
         /usr/syno/bin/synosystemctl reload syslog-ng || true
     endscript
