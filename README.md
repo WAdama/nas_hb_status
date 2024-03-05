@@ -20,6 +20,8 @@ I personally use "Login via private key" with an user especially for monitoring 
 
 **HINT:** Since DSM 6.2.2 for SSH access the user has to be member of the local administrators group on your Synology NAS.
 
+**Hint:** In order for users to be able to do sudo without a password, the following line must be added to /etc/sudoers: ```%administrators ALL = NOPASSWD: ALL```
+
 ### Installing
 
 Place the script to /var/prtg/scriptsxml on your Synology NAS and make it executable. (You may have to create this directory structure because PRTG expects the script here.)
