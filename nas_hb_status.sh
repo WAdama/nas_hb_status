@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.1.2
+# Version 2.1.3
 
 #Load configuration file
 source "$1"
@@ -62,6 +62,7 @@ do
         BKP_TIME_INT_STRT="0"
         BKP_TIME_INT_END="0"
         BKP_LAST_RUN_INT="0"
+        BKP_SPEED="0"
     else
         BKP_SIZE=$(("$(awk "/img_backup/ && /$BKP_TASKID/ && /TargetSize/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*: TargetSize(KB):\[\s*\([0-9]*\).*$/\1/p")"*1024))
         BKP_SIZE_LAST=$(("$(awk "/img_backup/ && /$BKP_TASKID/ && /TargetSize/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*LastBackupTargetSize(KB):\[\s*\([0-9]*\).*$/\1/p")"*1024))
@@ -104,7 +105,11 @@ do
             BKP_REAL_STRT=$(date -d "$(awk "/\[BkpCtrl\]/ && /\[$BKP_TASKID\]/" "${SYSLOG[@]}" | tail -1 | grep -o "[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}T[0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")" +%s)
             BKP_REAL_END=$(date -d "$(awk "/\[BackupTaskFinished\]/ && /\[$BKP_TASKID\]/" "${SYSLOG[@]}" | tail -1 | grep -o "[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}T[0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")" +%s)
             BKP_REALRUNTIME=$(("$BKP_REAL_END"-"$BKP_REAL_STRT"))
-            BKP_SPEED=$(("$BKP_CHANGE"/"$BKP_REALRUNTIME"))
+            if [ "$BKP_STATUS" == 1 ] || [ "$BKP_STATUS" == 8 ]; then
+                BKP_SPEED=$(("$BKP_CHANGE"/"$BKP_REALRUNTIME"))
+            else
+                BKP_SPEED="0"
+            fi
         fi
     fi
     #Setting times when backup is running
