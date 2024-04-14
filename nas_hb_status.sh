@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.1.3
+# Version 2.1.4
 
 #Load configuration file
 source "$1"
@@ -8,7 +8,7 @@ VERSIONHB=$(/usr/syno/bin/synopkg version HyperBackup)
 VERSION=${VERSIONHB:0:1}${VERSIONHB:2:1}
 if [ "$VERSION" -gt "40" ]
 then
-    mapfile -t SYSLOG < <( find /volume1/@appdata/HyperBackup/log/hyperbackup.l*[!.xz] | sort -r | tail -2 )
+    mapfile -t SYSLOG < <( find /volume1/@appdata/HyperBackup/log/hyperbackup.l*[!.xz] | sort -r )
     if find /volume1/@appdata/HyperBackup/log/hyperbackup.*.xz > /dev/null 2>&1
     then
         MESSAGE="Compression for log file active. This may obstruct the sensor data!"
@@ -20,7 +20,7 @@ mapfile -t LOGS < <( find /var/log/synolog/synobackup.l*[!.xz] | sort -r )
 TIME=$(date +%s)
 
 echo "<?xml version=\"10.0\" encoding=\"UTF-8\" ?><prtg>"
-#Getting results for task
+#Getting results for one task
 for BKP_TASK in "${BKP_TASKS[@]}"
 do
     #Getting backup status data
@@ -29,27 +29,29 @@ do
     BKP_TASKID=$(awk "/task/ && /\[$BKP_TASK\]/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*: (\s*\([0-9]*\).*$/\1/p")
     #Setting value for status of last backup
     case $BKP_RESULT in
-        *"finished successfully"*) BKP_STATUS="1" ;;
-        *"Failed"*) BKP_STATUS="2" ;;
-        *"created"*) BKP_STATUS="3" ;;
-        *"started"*) BKP_STATUS="4" ;;
-        *"cancelled"*) BKP_STATUS="5" ;;
-        *"suspension complete"*) BKP_STATUS="6" ;;
-        *"resume backup"*) BKP_STATUS="7" ;;
-        *"partially completed"*) BKP_STATUS="8" ;;
-        *"discard backup"*) BKP_STATUS="9" ;;
+        *"Relink finished successfully"*) BKP_STATUS="12" ;;
+        *"Relink task started"*) BKP_STATUS="11" ;;
         *"discarded successfully"*) BKP_STATUS="10" ;;
+        *"discard backup"*) BKP_STATUS="9" ;;
+        *"partially completed"*) BKP_STATUS="8" ;;
+        *"resume backup"*) BKP_STATUS="7" ;;
+        *"suspension complete"*) BKP_STATUS="6" ;;
+        *"cancelled"*) BKP_STATUS="5" ;;
+        *"started"*) BKP_STATUS="4" ;;
+        *"created"*) BKP_STATUS="3" ;;
+        *"Failed"*) BKP_STATUS="2" ;;
+        *"finished successfully"*) BKP_STATUS="1" ;;
         *) BKP_STATUS="0" ;;
     esac
     #Setting value for status of last integrity check
     case $BKP_RESULT_INT in
-        *"No error was found"*) BKP_STATUS_INT="1" ;;
-        *"has started"*) BKP_STATUS_INT="2" ;;
-        *"target is found broken"*) BKP_STATUS_INT="3" ;;
         *"Failed to run backup integrity check"*) BKP_STATUS_INT="4" ;;
+        *"target is found broken"*) BKP_STATUS_INT="3" ;;
+        *"has started"*) BKP_STATUS_INT="2" ;;
+        *"No error was found"*) BKP_STATUS_INT="1" ;;
         *) BKP_STATUS_INT="0" ;;
     esac
-    #Getting and calculating backup sizes and times
+    #Getting and calculating backup sizes and times (only when at least one backup task has been completed)
     if [ -z "${BKP_TASKID}" ]; then
         BKP_SIZE="0"
         BKP_SIZE_LAST="0"
@@ -69,41 +71,34 @@ do
         BKP_CHANGE=$(("$BKP_SIZE"-"$BKP_SIZE_LAST"))
         #Getting and calculating times
         BKP_RUNTIME=$(awk "/Backup task/ && /\[$BKP_TASK\]/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*Time spent: \[\s*\([0-9]*\).*$/\1/p")
-        BKP_TIME_STRT=$(awk "/Backup task/ && /started/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
+        BKP_TIME_STRT=$(date -d "$(awk "/Backup task/ && /started/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1 | awk -F "\t" '{print $2}')" +%s)
         if [ -z "${BKP_TIME_STRT}" ]; then
             BKP_TIME_STRT="0"
-        else
-            BKP_TIME_STRT=$(date -d "$BKP_TIME_STRT" +%s)
         fi
-        BKP_TIME_RESD=$(awk "/backup task/ && /resume/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
+        BKP_TIME_RESD=$(date -d "$(awk "/backup task/ && /resume/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1 | awk -F "\t" '{print $2}')" +%s)
         if [ -n "${BKP_TIME_RESD}" ] && [ "${BKP_STATUS}" == 7 ]; then
-            BKP_TIME_STRT=$(date -d "$BKP_TIME_RESD" +%s)
+            BKP_TIME_STRT="$BKP_TIME_RESD"
         fi
-        BKP_TIME_END=$(awk "/Backup task/ && /finished/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
+        BKP_TIME_END=$(date -d "$(awk "/Backup task/ && /finished/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1 | awk -F "\t" '{print $2}')" +%s)
         if [ -z "${BKP_TIME_END}" ]; then
             BKP_TIME_END="0"
-        else
-            BKP_TIME_END=$(date -d "$BKP_TIME_END" +%s)
         fi
-        BKP_TIME_INT_STRT=$(awk "/Backup integrity check/ && /started/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
+        BKP_TIME_INT_STRT=$(date -d "$(awk "/Backup integrity check/ && /started/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1 | awk -F "\t" '{print $2}')" +%s)
         if [ -z "${BKP_TIME_INT_STRT}" ]; then
             BKP_TIME_INT_STRT="0"
-        else
-            BKP_TIME_INT_STRT=$(date -d "$BKP_TIME_INT_STRT" +%s)
         fi
-        BKP_TIME_INT_END=$(awk "/Backup integrity check/ && /finished/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1 | grep -o "[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\}\ [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")
+        BKP_TIME_INT_END=$(date -d "$(awk "/Backup integrity check/ && /finished/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1 | awk -F "\t" '{print $2}')" +%s)
         if [ -z "${BKP_TIME_INT_END}" ]; then
             BKP_TIME_INT_END="0"
             BKP_LAST_RUN_INT="0"
         else
-            BKP_TIME_INT_END=$(date -d "$BKP_TIME_INT_END" +%s)
             BKP_LAST_RUN_INT=$(("$TIME"-"$BKP_TIME_INT_END"))
         fi
         BKP_LAST_RUN=$(("$TIME"-"$BKP_TIME_END"))
         BKP_RUNTIME_INT=$(("$BKP_TIME_INT_END"-"$BKP_TIME_INT_STRT"))
         if [ "$BKP_TIME_END" != 0 ]; then
-            BKP_REAL_STRT=$(date -d "$(awk "/\[BkpCtrl\]/ && /\[$BKP_TASKID\]/" "${SYSLOG[@]}" | tail -1 | grep -o "[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}T[0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")" +%s)
-            BKP_REAL_END=$(date -d "$(awk "/\[BackupTaskFinished\]/ && /\[$BKP_TASKID\]/" "${SYSLOG[@]}" | tail -1 | grep -o "[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}T[0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}")" +%s)
+            BKP_REAL_STRT=$(date -d "$(awk "/\[BkpCtrl\]/ && /\[$BKP_TASKID\]/" "${SYSLOG[@]}" | tail -1 | awk '{print $1}')" +%s)
+            BKP_REAL_END=$(date -d "$(awk "/\[BackupTaskFinished\]/ && /\[$BKP_TASKID\]/" "${SYSLOG[@]}" | tail -1 | awk '{print $1}')" +%s)
             BKP_REALRUNTIME=$(("$BKP_REAL_END"-"$BKP_REAL_STRT"))
             if [ "$BKP_STATUS" == 1 ] || [ "$BKP_STATUS" == 8 ]; then
                 BKP_SPEED=$(("$BKP_CHANGE"/"$BKP_REALRUNTIME"))
@@ -112,8 +107,9 @@ do
             fi
         fi
     fi
-    #Setting times when backup is running
+    #Setting times when backups or integrity checks are running
     if [ "$BKP_STATUS" == 4 ] || [ "$BKP_STATUS" == 7 ]; then
+        BKP_TIME_STRT=$(date -d "$(awk "/Backup task/ && /started/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1 | awk -F "\t" '{print $2}')" +%s)
         BKP_RUNTIME=$(("$TIME"-"$BKP_TIME_STRT"))
         BKP_LAST_RUN=$(("$TIME"-"$BKP_TIME_END"))
     fi
