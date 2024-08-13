@@ -63,3 +63,6 @@ Upper error limit: 8 d 1h (694800 s)
 **Hint:** If you created your sensor with an earlier version please create it new when you use the actual version. I've changed the name for channel *Time passed* to *Last backup*
 
 ![Screenshot1](./images/nas_hb_status2_sensor.png)
+
+nas_hb_status_state.sh:
+![Screenshot1](./images/nas_hb_status_state_sensor.png)
