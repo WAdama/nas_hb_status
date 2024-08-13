@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.1.4
+# Version 2.1.5
 
 #Load configuration file
 source "$1"
@@ -24,9 +24,9 @@ echo "<?xml version=\"10.0\" encoding=\"UTF-8\" ?><prtg>"
 for BKP_TASK in "${BKP_TASKS[@]}"
 do
     #Getting backup status data
-    BKP_RESULT=$(awk "/task/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
+    BKP_RESULT=$(awk "/Backup task/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
     BKP_RESULT_INT=$(awk "/integrity check/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
-    BKP_TASKID=$(awk "/task/ && /\[$BKP_TASK\]/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*: (\s*\([0-9]*\).*$/\1/p")
+    BKP_TASKID=$(awk "/Backup task/ && /\[$BKP_TASK\]/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*: (\s*\([0-9]*\).*$/\1/p")
     #Setting value for status of last backup
     case $BKP_RESULT in
         *"Relink finished successfully"*) BKP_STATUS="12" ;;
@@ -91,11 +91,13 @@ do
         if [ -z "${BKP_TIME_INT_END}" ]; then
             BKP_TIME_INT_END="0"
             BKP_LAST_RUN_INT="0"
+            BKP_RUNTIME_INT="0"
         else
             BKP_LAST_RUN_INT=$(("$TIME"-"$BKP_TIME_INT_END"))
+            BKP_RUNTIME_INT=$(("$BKP_TIME_INT_END"-"$BKP_TIME_INT_STRT"))
         fi
         BKP_LAST_RUN=$(("$TIME"-"$BKP_TIME_END"))
-        BKP_RUNTIME_INT=$(("$BKP_TIME_INT_END"-"$BKP_TIME_INT_STRT"))
+        #BKP_RUNTIME_INT=$(("$BKP_TIME_INT_END"-"$BKP_TIME_INT_STRT"))
         if [ "$BKP_TIME_END" != 0 ]; then
             BKP_REAL_STRT=$(date -d "$(awk "/\[BkpCtrl\]/ && /\[$BKP_TASKID\]/" "${SYSLOG[@]}" | tail -1 | awk '{print $1}')" +%s)
             BKP_REAL_END=$(date -d "$(awk "/\[BackupTaskFinished\]/ && /\[$BKP_TASKID\]/" "${SYSLOG[@]}" | tail -1 | awk '{print $1}')" +%s)
