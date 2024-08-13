@@ -10,6 +10,8 @@ Sensor tested on DS 918+ with DSM 7.2 and newer / Hyper Backup 4.1 and newer and
 
 **Note:** Since Hyper Backup version 4.1 there is a separate log in a different directory. Log rotation may result in no values being returned as all older logs are packed. This can only be circumvented by adjusting the log rotation: [Change logrotate config for HyperBackup logs](logrotate.md) 
 
+**Note:** This script works best with the versioned backup. But for those of you who uses the single version backup or don't want the whole statistical data, I've created "nas_hb_status_state.sh". It uses the same config file, but needs only the "prtg.standardlookups.nas.hbstatus.ovl" lookup file.
+
 ### Prerequisites
 
 Be sure you have set correct logon values for SSH in your device.
