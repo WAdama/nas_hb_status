@@ -1,22 +1,27 @@
 #!/bin/bash
-# Version 2.1.5
+# Version 2.1.6
 
 #Load configuration file
 source "$1"
 #Getting Hyper Backup version and set proper log file
 VERSIONHB=$(/usr/syno/bin/synopkg version HyperBackup)
-VERSION=${VERSIONHB:0:1}${VERSIONHB:2:1}
-if [ "$VERSION" -gt "40" ]
+VERSION=${VERSIONHB:0:1}${VERSIONHB:2:1}${VERSIONHB:4:1}
+if [ "$VERSION" -gt "400" ]
 then
-    mapfile -t SYSLOG < <( find /volume1/@appdata/HyperBackup/log/hyperbackup.l*[!.xz] | sort -r )
-    if find /volume1/@appdata/HyperBackup/log/hyperbackup.*.xz > /dev/null 2>&1
+    mapfile -t SYSLOG < <( find /var/packages/HyperBackup/var/log/hyperbackup.l*[!.xz] | sort -r )
+    if find /var/packages/HyperBackup/var/log/hyperbackup.*.xz > /dev/null 2>&1
     then
         MESSAGE="Compression for log file active. This may obstruct the sensor data!"
     fi
 else
     SYSLOG=("/var/log/messages")
 fi
-mapfile -t LOGS < <( find /var/log/synolog/synobackup.l*[!.xz] | sort -r )
+if [ "$VERSION" -gt "411" ]
+then
+    mapfile -t LOGS < <( find /var/packages/HyperBackup/var/log/synolog/synobackup.l*[!.xz] | sort -r )
+else
+    mapfile -t LOGS < <( find /var/log/synolog/synobackup.l*[!.xz] | sort -r )
+fi
 TIME=$(date +%s)
 
 echo "<?xml version=\"10.0\" encoding=\"UTF-8\" ?><prtg>"
@@ -97,6 +102,7 @@ do
             BKP_RUNTIME_INT=$(("$BKP_TIME_INT_END"-"$BKP_TIME_INT_STRT"))
         fi
         BKP_LAST_RUN=$(("$TIME"-"$BKP_TIME_END"))
+        #BKP_RUNTIME_INT=$(("$BKP_TIME_INT_END"-"$BKP_TIME_INT_STRT"))
         if [ "$BKP_TIME_END" != 0 ]; then
             BKP_REAL_STRT=$(date -d "$(awk "/\[BkpCtrl\]/ && /\[$BKP_TASKID\]/" "${SYSLOG[@]}" | tail -1 | awk '{print $1}')" +%s)
             BKP_REAL_END=$(date -d "$(awk "/\[BackupTaskFinished\]/ && /\[$BKP_TASKID\]/" "${SYSLOG[@]}" | tail -1 | awk '{print $1}')" +%s)
