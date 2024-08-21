@@ -2,10 +2,15 @@
 # Version 1.0.1
 
 #Load configuration file
-source "$1"
+source "$1" > /dev/null 2>&1
+if [ -z "$1" ]
+then
+    echo "Configuration missing... Please provide a configuration file to run this script!"
+    exit
+fi
 #Getting Hyper Backup version and set proper log file
-VERSIONHB=$(/usr/syno/bin/synopkg version HyperBackup)
-VERSION=${VERSIONHB:0:1}${VERSIONHB:2:1}${VERSIONHB:4:1}
+VERSION=$(/usr/syno/bin/synopkg version HyperBackup)
+VERSION=${VERSION:0:1}${VERSION:2:1}${VERSION:4:1}
 if [ "$VERSION" -gt "40" ]
 then
     mapfile -t SYSLOG < <( find /var/packages/HyperBackup/var/log/hyperbackup.l*[!.xz] | sort -r )
