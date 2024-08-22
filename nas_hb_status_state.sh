@@ -11,7 +11,7 @@ fi
 #Getting Hyper Backup version and set proper log file
 VERSION=$(/usr/syno/bin/synopkg version HyperBackup)
 VERSION=${VERSION:0:1}${VERSION:2:1}${VERSION:4:1}
-if [ "$VERSION" -gt "40" ]
+if [ "$VERSION" -gt "400" ]
 then
     mapfile -t SYSLOG < <( find /var/packages/HyperBackup/var/log/hyperbackup.l*[!.xz] | sort -r )
     if find /var/packages/HyperBackup/var/log/hyperbackup.*.xz > /dev/null 2>&1
