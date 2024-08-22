@@ -1,9 +1,9 @@
 #!/bin/bash
-# Version 1.0.1
+# Version 1.0.2
 
 #Load configuration file
 source "$1" > /dev/null 2>&1
-if [ -z "$1" ]
+if [ $? == 1 ]
 then
     echo "Configuration missing... Please provide a configuration file to run this script!"
     exit
