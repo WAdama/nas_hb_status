@@ -34,7 +34,7 @@ echo "<?xml version=\"10.0\" encoding=\"UTF-8\" ?><prtg>"
 for BKP_TASK in "${BKP_TASKS[@]}"
 do
     #Getting backup status data
-    BKP_RESULT=$(awk "/Backup task/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
+    BKP_RESULT=$(awk "(/Backup task/ || /backup task/) && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
     BKP_TASKID=$(awk "/Backup task/ && /\[$BKP_TASK\]/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*: (\s*\([0-9]*\).*$/\1/p")
     #Setting value for status of last backup
     case $BKP_RESULT in
