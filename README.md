@@ -12,6 +12,8 @@ Sensor tested on DS 918+ with DSM 7.2 and newer / Hyper Backup 4.1 and newer and
 
 **Note:** This script works best with the versioned backup. But for those of you who uses the single version backup or don't want the whole statistical data, I've created "nas_hb_status_state.sh". It uses the same config file, but needs only the "prtg.standardlookups.nas.hbstatus.ovl" lookup file.
 
+**Note:** As "source" can be misused in bash scripts, I have changed the conf file to JSON format. If you want to update to the new script, pause your sensor(s), change to the new script and recreate your conf files in JSON format with the same backups to monitored. Then just resume the sensor(s).
+
 ### Prerequisites
 
 Be sure you have set correct logon values for SSH in your device.
@@ -46,8 +48,13 @@ For the sensor create a conf file in the chosen path.
 The configuration file must contain the following entries according to your backup tasks:
 
 ```
-BKP_TASKS=("Backup - No1" "Backup - No2" "Backup - No3")
-```
+{
+  "tasks": [
+    "Backup - No1",
+    "Backup - No2",
+    "Backup - No3"
+    ]
+}```
 This script will set default values for limits in *Last backup* channel:
 
 Upper warning limit: 36 h (129600 s)

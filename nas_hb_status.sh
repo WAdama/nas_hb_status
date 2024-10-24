@@ -1,8 +1,8 @@
 #!/bin/bash
-# Version 2.1.8
+# Version 2.1.9
 
 #Load configuration file
-source "$1" > /dev/null 2>&1
+mapfile -t BKP_TASKS < <( jq -r .tasks[] "$1" )
 if [ $? == 1 ]
 then
     echo "Configuration missing... Please provide a configuration file to run this script!"
