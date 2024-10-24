@@ -45,7 +45,7 @@ Choose under "Script" this script and enter under "Parameters" the name and path
 
 For the sensor create a conf file in the chosen path.
 
-The configuration file must contain the following entries according to your backup tasks:
+The configuration file must contain the following entries according to your backup tasks in JSON format:
 
 ```
 {
