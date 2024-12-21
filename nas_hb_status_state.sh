@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 1.0.3
+# Version 1.0.4
 
 #Load configuration file
 mapfile -t BKP_TASKS < <( jq -r .tasks[] "$1" )
@@ -34,10 +34,13 @@ echo "<?xml version=\"10.0\" encoding=\"UTF-8\" ?><prtg>"
 for BKP_TASK in "${BKP_TASKS[@]}"
 do
     #Getting backup status data
-    BKP_RESULT=$(awk "(/Backup task/ || /backup task/) && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
+    BKP_RESULT=$(awk "(/Backup task/ || /backup task/ || /Restore/ || /restore/) && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
     BKP_TASKID=$(awk "/Backup task/ && /\[$BKP_TASK\]/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*: (\s*\([0-9]*\).*$/\1/p")
     #Setting value for status of last backup
     case $BKP_RESULT in
+        *"Failed to run restore"*) BKP_STATUS="15" ;;
+        *"Restore finished successfully"*) BKP_STATUS="14" ;;
+        *"Started to restore"*) BKP_STATUS="13" ;;
         *"Relink finished successfully"*) BKP_STATUS="12" ;;
         *"Relink task started"*) BKP_STATUS="11" ;;
         *"discarded successfully"*) BKP_STATUS="10" ;;

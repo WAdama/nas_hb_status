@@ -34,5 +34,20 @@
       <SingleInt state="Warning" value="10">
         Discarded successfully
       </SingleInt>
+      <SingleInt state="Ok" value="11">
+        Relinking
+      </SingleInt>
+      <SingleInt state="Ok" value="12">
+        Relink completed
+      </SingleInt>
+      <SingleInt state="Ok" value="13">
+        Restoring
+      </SingleInt>
+      <SingleInt state="Ok" value="14">
+        Restore completed
+      </SingleInt>
+      <SingleInt state="Warning" value="15">
+        Restore failed
+      </SingleInt>
     </Lookups>
   </ValueLookup>

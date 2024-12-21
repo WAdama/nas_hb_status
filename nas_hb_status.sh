@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.1.9
+# Version 2.1.10
 
 #Load configuration file
 mapfile -t BKP_TASKS < <( jq -r .tasks[] "$1" )
@@ -34,11 +34,14 @@ echo "<?xml version=\"10.0\" encoding=\"UTF-8\" ?><prtg>"
 for BKP_TASK in "${BKP_TASKS[@]}"
 do
     #Getting backup status data
-    BKP_RESULT=$(awk "(/Backup task/ || /backup task/) && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
+    BKP_RESULT=$(awk "(/Backup task/ || /backup task/ || /Restore/ || /restore/) && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
     BKP_RESULT_INT=$(awk "/integrity check/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
     BKP_TASKID=$(awk "/Backup task/ && /\[$BKP_TASK\]/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*: (\s*\([0-9]*\).*$/\1/p")
     #Setting value for status of last backup
     case $BKP_RESULT in
+        *"Failed to run restore"*) BKP_STATUS="15" ;;
+        *"Restore finished successfully"*) BKP_STATUS="14" ;;
+        *"Started to restore"*) BKP_STATUS="13" ;;
         *"Relink finished successfully"*) BKP_STATUS="12" ;;
         *"Relink task started"*) BKP_STATUS="11" ;;
         *"discarded successfully"*) BKP_STATUS="10" ;;
@@ -136,7 +139,7 @@ do
         BKP_LAST_RUN_INT="0"
     fi
     #Creating sensor
-    echo "<result><channel>$BKP_TASK: Last backup</channel><value>$BKP_LAST_RUN</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>129600</LimitMaxWarning><LimitMaxError>216000</LimitMaxError></result><result><channel>$BKP_TASK: Status</channel><value>$BKP_STATUS</value><ValueLookup>prtg.standardlookups.nas.hbstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$BKP_TASK: Backup Runtime</channel><value>$BKP_RUNTIME</value><unit>TimeSeconds</unit></result><result><channel>$BKP_TASK: Size</channel><value>$BKP_SIZE</value><unit>BytesDisk</unit><VolumeSize>GigaByte</VolumeSize></result><result><channel>$BKP_TASK: Change</channel><value>$BKP_CHANGE</value><unit>BytesDisk</unit><VolumeSize>GigaByte</VolumeSize></result><result><channel>$BKP_TASK: Speed</channel><value>$BKP_SPEED</value><unit>SpeedDisk</unit><SpeedSize>MegaByte</SpeedSize></result><result><channel>$BKP_TASK: Integrity Check</channel><value>$BKP_STATUS_INT</value><ValueLookup>prtg.standardlookups.nas.hbintstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$BKP_TASK: Last Integrity Check</channel><value>$BKP_LAST_RUN_INT</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>608400</LimitMaxWarning><LimitMaxError>694800</LimitMaxError></result><result><channel>$BKP_TASK: Integrity Check Runtime</channel><value>$BKP_RUNTIME_INT</value><unit>TimeSeconds</unit></result>"
+    echo "<result><channel>$BKP_TASK: Last backup</channel><value>$BKP_LAST_RUN</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>129600</LimitMaxWarning><LimitMaxError>216000</LimitMaxError></result><result><channel>$BKP_TASK: Status</channel><value>$BKP_STATUS</value><ValueLookup>prtg.standardlookups.nas.hbstatust</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$BKP_TASK: Backup Runtime</channel><value>$BKP_RUNTIME</value><unit>TimeSeconds</unit></result><result><channel>$BKP_TASK: Size</channel><value>$BKP_SIZE</value><unit>BytesDisk</unit><VolumeSize>GigaByte</VolumeSize></result><result><channel>$BKP_TASK: Change</channel><value>$BKP_CHANGE</value><unit>BytesDisk</unit><VolumeSize>GigaByte</VolumeSize></result><result><channel>$BKP_TASK: Speed</channel><value>$BKP_SPEED</value><unit>SpeedDisk</unit><SpeedSize>MegaByte</SpeedSize></result><result><channel>$BKP_TASK: Integrity Check</channel><value>$BKP_STATUS_INT</value><ValueLookup>prtg.standardlookups.nas.hbintstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$BKP_TASK: Last Integrity Check</channel><value>$BKP_LAST_RUN_INT</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>608400</LimitMaxWarning><LimitMaxError>694800</LimitMaxError></result><result><channel>$BKP_TASK: Integrity Check Runtime</channel><value>$BKP_RUNTIME_INT</value><unit>TimeSeconds</unit></result>"
 done
 if [ "${MESSAGE}" ]; then
     echo "<text>$MESSAGE</text>"
