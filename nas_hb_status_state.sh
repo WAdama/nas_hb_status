@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 1.0.4
+# Version 1.0.5
 
 #Load configuration file
 mapfile -t BKP_TASKS < <( jq -r .tasks[] "$1" )
@@ -35,26 +35,25 @@ for BKP_TASK in "${BKP_TASKS[@]}"
 do
     #Getting backup status data
     BKP_RESULT=$(awk "(/Backup task/ || /backup task/ || /Restore/ || /restore/) && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
+    BKP_ROTATE=$(awk "(/Version rotation/) && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
     BKP_TASKID=$(awk "/Backup task/ && /\[$BKP_TASK\]/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*: (\s*\([0-9]*\).*$/\1/p")
     #Setting value for status of last backup
     case $BKP_RESULT in
-        *"Failed to run restore"*) BKP_STATUS="15" ;;
-        *"Restore finished successfully"*) BKP_STATUS="14" ;;
-        *"Started to restore"*) BKP_STATUS="13" ;;
-        *"Relink finished successfully"*) BKP_STATUS="12" ;;
-        *"Relink task started"*) BKP_STATUS="11" ;;
-        *"discarded successfully"*) BKP_STATUS="10" ;;
-        *"discard backup"*) BKP_STATUS="9" ;;
-        *"partially completed"*) BKP_STATUS="8" ;;
-        *"resume backup"*) BKP_STATUS="7" ;;
-        *"suspension complete"*) BKP_STATUS="6" ;;
-        *"cancelled"*) BKP_STATUS="5" ;;
-        *"started"*) BKP_STATUS="4" ;;
-        *"created"*) BKP_STATUS="3" ;;
-        *"Failed"*) BKP_STATUS="2" ;;
+        *"partially completed"*) BKP_STATUS="9" ;;
+        *"resume backup"*) BKP_STATUS="8" ;;
+        *"suspension complete"*) BKP_STATUS="7" ;;
+        *"cancelled"*) BKP_STATUS="6" ;;
+        *"started"*) BKP_STATUS="5" ;;
+        *"created"*) BKP_STATUS="4" ;;
+        *"Failed"*) BKP_STATUS="3" ;;
         *"finished successfully"*) BKP_STATUS="1" ;;
         *) BKP_STATUS="0" ;;
     esac
+    if [ $BKP_STATUS == 1 ]; then
+        case $BKP_ROTATE in
+            *"started"*) BKP_STATUS="2" ;;
+        esac
+    fi
     #Getting and calculating backup times (only when at least one backup task has been completed)
     if [ -z "${BKP_TASKID}" ]; then
         BKP_RUNTIME="0"

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.1.10
+# Version 2.1.11
 
 #Load configuration file
 mapfile -t BKP_TASKS < <( jq -r .tasks[] "$1" )
@@ -34,28 +34,27 @@ echo "<?xml version=\"10.0\" encoding=\"UTF-8\" ?><prtg>"
 for BKP_TASK in "${BKP_TASKS[@]}"
 do
     #Getting backup status data
-    BKP_RESULT=$(awk "(/Backup task/ || /backup task/ || /Restore/ || /restore/) && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
+    BKP_RESULT=$(awk "(/Backup task/ || /backup task/) && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
+    BKP_ROTATE=$(awk "(/Version rotation/) && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
     BKP_RESULT_INT=$(awk "/integrity check/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1)
     BKP_TASKID=$(awk "/Backup task/ && /\[$BKP_TASK\]/" "${SYSLOG[@]}" | tail -1 | sed -n "s/^.*: (\s*\([0-9]*\).*$/\1/p")
     #Setting value for status of last backup
     case $BKP_RESULT in
-        *"Failed to run restore"*) BKP_STATUS="15" ;;
-        *"Restore finished successfully"*) BKP_STATUS="14" ;;
-        *"Started to restore"*) BKP_STATUS="13" ;;
-        *"Relink finished successfully"*) BKP_STATUS="12" ;;
-        *"Relink task started"*) BKP_STATUS="11" ;;
-        *"discarded successfully"*) BKP_STATUS="10" ;;
-        *"discard backup"*) BKP_STATUS="9" ;;
-        *"partially completed"*) BKP_STATUS="8" ;;
-        *"resume backup"*) BKP_STATUS="7" ;;
-        *"suspension complete"*) BKP_STATUS="6" ;;
-        *"cancelled"*) BKP_STATUS="5" ;;
-        *"started"*) BKP_STATUS="4" ;;
-        *"created"*) BKP_STATUS="3" ;;
-        *"Failed"*) BKP_STATUS="2" ;;
+        *"partially completed"*) BKP_STATUS="9" ;;
+        *"resume backup"*) BKP_STATUS="8" ;;
+        *"suspension complete"*) BKP_STATUS="7" ;;
+        *"cancelled"*) BKP_STATUS="6" ;;
+        *"started"*) BKP_STATUS="5" ;;
+        *"created"*) BKP_STATUS="4" ;;
+        *"Failed"*) BKP_STATUS="3" ;;
         *"finished successfully"*) BKP_STATUS="1" ;;
         *) BKP_STATUS="0" ;;
     esac
+    if [ $BKP_STATUS == 1 ]; then
+        case $BKP_ROTATE in
+            *"started"*) BKP_STATUS="2" ;;
+        esac
+    fi
     #Setting value for status of last integrity check
     case $BKP_RESULT_INT in
         *"Failed to run backup integrity check"*) BKP_STATUS_INT="4" ;;
@@ -101,7 +100,7 @@ do
             BKP_TIME_INT_STRT="0"
         fi
         BKP_TIME_INT_END=$(date -d "$(awk "/Backup integrity check/ && /finished/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1 | awk -F "\t" '{print $2}')" +%s)
-        if [ -z "${BKP_TIME_INT_END}" ]; then
+        if [ $BKP_STATUS_INT == 2 ]; then
             BKP_TIME_INT_END="0"
             BKP_LAST_RUN_INT="0"
             BKP_RUNTIME_INT="0"
@@ -110,7 +109,6 @@ do
             BKP_RUNTIME_INT=$(("$BKP_TIME_INT_END"-"$BKP_TIME_INT_STRT"))
         fi
         BKP_LAST_RUN=$(("$TIME"-"$BKP_TIME_END"))
-        #BKP_RUNTIME_INT=$(("$BKP_TIME_INT_END"-"$BKP_TIME_INT_STRT"))
         if [ "$BKP_TIME_END" != 0 ]; then
             BKP_REAL_STRT=$(date -d "$(awk "/\[BkpCtrl\]/ && /\[$BKP_TASKID\]/" "${SYSLOG[@]}" | tail -1 | awk '{print $1}')" +%s)
             BKP_REAL_END=$(date -d "$(awk "/\[BackupTaskFinished\]/ && /\[$BKP_TASKID\]/" "${SYSLOG[@]}" | tail -1 | awk '{print $1}')" +%s)
@@ -126,20 +124,14 @@ do
     if [ "$BKP_STATUS" == 4 ] || [ "$BKP_STATUS" == 7 ]; then
         BKP_TIME_STRT=$(date -d "$(awk "/Backup task/ && /started/ && /\[$BKP_TASK\]/" "${LOGS[@]}" | tail -1 | awk -F "\t" '{print $2}')" +%s)
         BKP_RUNTIME=$(("$TIME"-"$BKP_TIME_STRT"))
-        BKP_LAST_RUN=$(("$TIME"-"$BKP_TIME_END"))
-    fi
-    if [ "$BKP_TIME_END" == 0 ]; then
-        BKP_LAST_RUN="0"
+        BKP_LAST_RUN=$(("$TIME"-"$BKP_TIME_STRT"))
     fi
     if [ "$BKP_STATUS_INT" == 2 ]; then
         BKP_RUNTIME_INT=$(("$TIME"-"$BKP_TIME_INT_STRT"))
-        BKP_LAST_RUN_INT=$(("$TIME"-"$BKP_TIME_INT_END"))
-    fi
-    if [ "$BKP_TIME_INT_END" == 0 ]; then
-        BKP_LAST_RUN_INT="0"
+        BKP_LAST_RUN_INT=$(("$TIME"-"$BKP_TIME_INT_STRT"))
     fi
     #Creating sensor
-    echo "<result><channel>$BKP_TASK: Last backup</channel><value>$BKP_LAST_RUN</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>129600</LimitMaxWarning><LimitMaxError>216000</LimitMaxError></result><result><channel>$BKP_TASK: Status</channel><value>$BKP_STATUS</value><ValueLookup>prtg.standardlookups.nas.hbstatust</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$BKP_TASK: Backup Runtime</channel><value>$BKP_RUNTIME</value><unit>TimeSeconds</unit></result><result><channel>$BKP_TASK: Size</channel><value>$BKP_SIZE</value><unit>BytesDisk</unit><VolumeSize>GigaByte</VolumeSize></result><result><channel>$BKP_TASK: Change</channel><value>$BKP_CHANGE</value><unit>BytesDisk</unit><VolumeSize>GigaByte</VolumeSize></result><result><channel>$BKP_TASK: Speed</channel><value>$BKP_SPEED</value><unit>SpeedDisk</unit><SpeedSize>MegaByte</SpeedSize></result><result><channel>$BKP_TASK: Integrity Check</channel><value>$BKP_STATUS_INT</value><ValueLookup>prtg.standardlookups.nas.hbintstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$BKP_TASK: Last Integrity Check</channel><value>$BKP_LAST_RUN_INT</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>608400</LimitMaxWarning><LimitMaxError>694800</LimitMaxError></result><result><channel>$BKP_TASK: Integrity Check Runtime</channel><value>$BKP_RUNTIME_INT</value><unit>TimeSeconds</unit></result>"
+    echo "<result><channel>$BKP_TASK: Last backup</channel><value>$BKP_LAST_RUN</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>129600</LimitMaxWarning><LimitMaxError>216000</LimitMaxError></result><result><channel>$BKP_TASK: Status</channel><value>$BKP_STATUS</value><ValueLookup>prtg.standardlookups.nas.hbstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$BKP_TASK: Backup Runtime</channel><value>$BKP_RUNTIME</value><unit>TimeSeconds</unit></result><result><channel>$BKP_TASK: Size</channel><value>$BKP_SIZE</value><unit>BytesDisk</unit><VolumeSize>GigaByte</VolumeSize></result><result><channel>$BKP_TASK: Change</channel><value>$BKP_CHANGE</value><unit>BytesDisk</unit><VolumeSize>GigaByte</VolumeSize></result><result><channel>$BKP_TASK: Speed</channel><value>$BKP_SPEED</value><unit>SpeedDisk</unit><SpeedSize>MegaByte</SpeedSize></result><result><channel>$BKP_TASK: Integrity Check</channel><value>$BKP_STATUS_INT</value><ValueLookup>prtg.standardlookups.nas.hbintstatus</ValueLookup><ShowChart>0</ShowChart></result><result><channel>$BKP_TASK: Last Integrity Check</channel><value>$BKP_LAST_RUN_INT</value><unit>TimeSeconds</unit><LimitMode>1</LimitMode><LimitMaxWarning>608400</LimitMaxWarning><LimitMaxError>694800</LimitMaxError></result><result><channel>$BKP_TASK: Integrity Check Runtime</channel><value>$BKP_RUNTIME_INT</value><unit>TimeSeconds</unit></result>"
 done
 if [ "${MESSAGE}" ]; then
     echo "<text>$MESSAGE</text>"
