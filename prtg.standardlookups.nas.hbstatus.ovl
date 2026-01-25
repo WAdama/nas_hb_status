@@ -8,27 +8,30 @@
         Successful
       </SingleInt>
       <SingleInt state="Ok" value="2">
-        Successful, rotating backups
+        Successful, prepare backup rotation
       </SingleInt>
-      <SingleInt state="Error" value="3">
+      <SingleInt state="Warning" value="3">
+        Successful, rotate backup
+      </SingleInt>
+      <SingleInt state="Error" value="4">
         Failed
       </SingleInt>
-      <SingleInt state="Ok" value="4">
+      <SingleInt state="Ok" value="5">
         Created
       </SingleInt>
-      <SingleInt state="Ok" value="5">
+      <SingleInt state="Ok" value="6">
         Running
       </SingleInt>
-      <SingleInt state="Warning" value="6">
+      <SingleInt state="Warning" value="7">
         Cancelled
       </SingleInt>
-      <SingleInt state="Warning" value="7">
+      <SingleInt state="Warning" value="8">
         Suspended
       </SingleInt>
-      <SingleInt state="Ok" value="8">
+      <SingleInt state="Ok" value="9">
         Resumed
       </SingleInt>
-      <SingleInt state="Warning" value="9">
+      <SingleInt state="Warning" value="10">
         Partially completed
       </SingleInt>
     </Lookups>
