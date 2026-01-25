@@ -6,15 +6,9 @@ The sensor will show the status of the backups, integrity, time passed since the
 
 Sensor has to be created in PRTG on your Synology device.
 
-Sensor tested on DS 918+ with DSM 7.2 and newer / Hyper Backup 4.1 and newer and Cloud Backup (HiDrive) and Remote NAS backup to Hyper Backup Vault to DSM 7.2 and 6.2.4. Should work with older verions, too.
-
-**Note:** Since Hyper Backup version 4.1 there is a separate log in a different directory. Log rotation may result in no values being returned as all older logs are packed. This can only be circumvented by adjusting the log rotation: [Change logrotate config for HyperBackup logs](logrotate.md) 
+Sensor tested on DS 925+ with DSM 7.3 and newer / Hyper Backup 4.1 and newer and Cloud Backup (Hetzner Storage Box) and Remote NAS backup to Hyper Backup Vault to DSM 7.3. Should work with older verions, too.
 
 **Note:** This script works best with the versioned backup. But for those of you who uses the single version backup or don't want the whole statistical data, I've created "nas_hb_status_state.sh". It uses the same config file, but needs only the "prtg.standardlookups.nas.hbstatus.ovl" lookup file.
-
-**Note:** As "source" can be misused in bash scripts, I have changed the conf file to JSON format. If you want to update to the new script, pause your sensor(s), change to the new script and recreate your conf files in JSON format with the same backups to be monitored. Then just resume the sensor(s).
-
-**Note:** The state "Successful, rotating backups" only works with remote backups.
 
 ### Prerequisites
 

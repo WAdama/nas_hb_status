@@ -154,7 +154,7 @@ do
             BKP_LAST_RUN_INT=$(calculate_runtime "$BKP_TIME_INT_END" "$TIME")
             BKP_RUNTIME_INT=$(calculate_runtime "$BKP_TIME_INT_STRT" "$BKP_TIME_INT_END")
         fi
-        BKP_LAST_RUN=$(("$TIME"-"$BKP_TIME_END"))
+        BKP_LAST_RUN=$(calculate_runtime "$BKP_TIME_END" "$TIME")
         if [ "$BKP_TIME_END" != 0 ]; then
             BKP_REAL_STRT=$(timestamp "$(for f in "${SYSLOG[@]}"; do
                readlog "$f"
@@ -162,7 +162,7 @@ do
             BKP_REAL_END=$(timestamp "$(for f in "${SYSLOG[@]}"; do
                readlog "$f"
            done | awk "/\[BackupTaskFinished\]/ && /\[$BKP_TASKID\]/" | tail -1 | awk '{print $1}')")
-            BKP_REALRUNTIME=$(("$BKP_REAL_END"-"$BKP_REAL_STRT"))
+            BKP_REALRUNTIME=$(calculate_runtime "$BKP_REAL_STRT" "$BKP_REAL_END")
             if [ "$BKP_STATUS" == 1 ] || [ "$BKP_STATUS" == 8 ]; then
                 BKP_SPEED=$(("$BKP_CHANGE"/"$BKP_REALRUNTIME"))
             else
