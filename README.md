@@ -6,7 +6,7 @@ The sensor will show the status of the backups, integrity, time passed since the
 
 Sensor has to be created in PRTG on your Synology device.
 
-Sensor tested on DS 925+ with DSM 7.3 and newer / Hyper Backup 4.1 and newer and Cloud Backup (Hetzner Storage Box) and Remote NAS backup to Hyper Backup Vault to DSM 7.3. Should work with older verions, too.
+Sensor tested on DS 925+ with DSM 7.3 and newer / Hyper Backup 4.1 and newer and Cloud Backup (Hetzner Storage Box) and Remote NAS backup to Hyper Backup Vault on DSM 7.3. Should work with older verions, too.
 
 **Note:** This script works best with the versioned backup. But for those of you who uses the single version backup or don't want the whole statistical data, I've created "nas_hb_status_state.sh". It uses the same config file, but needs only the "prtg.standardlookups.nas.hbstatus.ovl" lookup file.
 
