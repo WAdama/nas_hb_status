@@ -1,7 +1,8 @@
 #!/bin/bash
-# Version 3.0.0
+# Version 3.0.1
 set -euo pipefail
 IFS=$'\n\t'
+API=$(which synowebapi)
 #Functions
 readlog() {
     [[ -e "$1" ]] || return
@@ -78,7 +79,7 @@ then
 else
     mapfile -t LOGS < <( ls -1r /var/log/synolog/synobackup.log* )
 fi
-TASKS=$(synowebapi -s --exec api=SYNO.Backup.Task method=list version=1)
+TASKS=$($API -s --exec api=SYNO.Backup.Task method=list version=1 | jq -r '.data.task_list[] | {name: .name, status: .status}')
 #Getting actual time
 TIME=$(date +%s)
 #Creating sensor
@@ -91,7 +92,7 @@ do
     BKP_RESULT=$(for f in "${LOGS[@]}"; do
         readlog "$f"
     done | awk '(/Backup task/ || /backup task/) && /\['"$BKP_TASK"'\]/ { line=$0 } END { print line }')
-    BKP_ROTATE=$( (jq -r '.data.task_list[] | select(.name=="'"$BKP_TASK"'")' | jq -r .status) <<< "$TASKS")
+    BKP_ROTATE=$( (jq -r 'select(.name=="'"$BKP_TASK"'")' | jq -r .status) <<< "$TASKS")
     BKP_RESULT_INT=$(for f in "${LOGS[@]}"; do
         readlog "$f"
     done | awk '/integrity check/ && /\['"$BKP_TASK"'\]/ { line=$0 } END { print line }')
